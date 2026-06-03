@@ -12,12 +12,24 @@ connectDB();
 
 const app = express();
 
-const allowedOrigins = [
-  'http://localhost:5173',
-  process.env.FRONTEND_URL, // e.g. https://aasamedchem.vercel.app
-].filter(Boolean);
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (curl, Postman), localhost, or any vercel.app domain
+    if (
+      !origin ||
+      origin.startsWith('http://localhost') ||
+      origin.endsWith('.vercel.app') ||
+      origin === process.env.FRONTEND_URL
+    ) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+};
 
-app.use(cors({ origin: allowedOrigins, credentials: true }));
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 
