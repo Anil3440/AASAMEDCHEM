@@ -12,7 +12,12 @@ connectDB();
 
 const app = express();
 
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+const allowedOrigins = [
+  'http://localhost:5173',
+  process.env.FRONTEND_URL, // e.g. https://aasamedchem.vercel.app
+].filter(Boolean);
+
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 
@@ -22,5 +27,11 @@ app.use('/api/orders', orderRoutes);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Local dev
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
+
+// Vercel serverless export
+module.exports = app;
